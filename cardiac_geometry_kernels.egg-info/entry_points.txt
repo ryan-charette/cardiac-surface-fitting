@@ -1,0 +1,2 @@
+[console_scripts]
+cardiac-kernels = cardiac_geometry.cli:main

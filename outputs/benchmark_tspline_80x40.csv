@@ -1,0 +1,3 @@
+case,method,num_u,num_v,control_points,mean_ms,median_ms,samples_per_second,max_abs_error
+bifurcation,numpy_vectorized,80,40,84,109.01839996222407,105.86779995355755,29352.843199944513,0.0
+bifurcation,numpy_fused_mapping,80,40,84,4972.510599996895,4972.510599996895,643.5380952233663,2.6645352591003757e-15

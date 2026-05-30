@@ -1,0 +1,21 @@
+[4756] python3.12@127.0.0.1
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::vectorized_elementwise_kernel<4, at::CUDAFunctor_add<float>, std::array<char *, 3>>(int, T2, T3) (1, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::vectorized_elementwise_kernel<4, at::CUDAFunctor_add<float>, std::array<char *, 3>>(int, T2, T3) (1, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::vectorized_elementwise_kernel<4, at::CUDAFunctor_add<float>, std::array<char *, 3>>(int, T2, T3) (1, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::vectorized_elementwise_kernel<4, at::CUDAFunctor_add<float>, std::array<char *, 3>>(int, T2, T3) (1, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  _one_sided_kernel (128, 1, 1)x(128, 1, 1), Context 1, Stream 7, Device 0, CC 8.9
+  void at::reduce_kernel<512, 1, at::ReduceOp<float, at::MeanOps<float, float, float, float>, unsigned int, float, 4, 4>>(T3) (1, 1, 1)x(512, 1, 1), Context 1, Stream 7, Device 0, CC 8.9

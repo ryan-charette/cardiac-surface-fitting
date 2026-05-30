@@ -1,0 +1,3 @@
+case,method,num_u,num_v,control_points,mean_ms,median_ms,samples_per_second,max_abs_error
+tube,numpy_vectorized,12,8,42,7.745350012555718,7.745350012555718,12394.533474197773,0.0
+tube,numpy_fused_mapping,12,8,42,94.26120005082339,94.26120005082339,1018.4466137524145,8.881784197001252e-16

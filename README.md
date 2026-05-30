@@ -1,0 +1,139 @@
+# GPU-Accelerated Cardiac Geometry Kernels
+
+CUDA, Triton, and NumPy reference code for T-spline surface evaluation and
+FasTFit-style point-cloud fitting on cardiac geometry examples.
+
+## Highlights
+
+- Clean NumPy reference evaluator for local-knot-vector rational T-splines.
+- Parallel FasTFit implementation based on the split-connect-fit paper:
+  adaptive Bezier patch generation over fixed 2D-parameterized point clouds.
+- Default C1-constrained global refit over accepted FasTFit patches, with
+  `continuity="none"` retaining the legacy independent-patch baseline.
+- Correctness checks for repeated knots, endpoint sampling, zero denominators,
+  Bernstein bases, C1 patch boundaries, deterministic parallel fitting,
+  vector-vs-mesh evaluation, and fused-vs-vectorized evaluation.
+- Fused CUDA forward kernel that computes basis values and rational accumulation
+  in one pass without materializing a `U x V x C` basis tensor.
+- Triton degree-2 surface-evaluation prototype for AI-kernel workflow
+  comparison.
+- CUDA, Triton, PyTorch, and NumPy Chamfer-distance paths for point-cloud
+  fitting experiments.
+- PyTorch-native fitted-surface evaluation for autograd through parameters and
+  fitted control points.
+- Measured RTX 4090 benchmark artifacts showing the Triton T-spline prototype
+  at 0.117 ms for an 80,000-sample grid and the tiled Triton Chamfer prototype
+  at 0.321 ms for an 8,192 x 8,192 point workload.
+- Small bundled tube and bifurcation samples extracted from the original heart
+  modeling repository.
+
+## Visualization
+
+![Before and after visualization of a cardiac point cloud fitted with the FasTFit surface model](docs/assets/before_after_fit.svg)
+
+The image is generated from the bundled LA ED point cloud using spherical
+parameterization, parameter-space occupancy masking around holes, and
+display-only mesh smoothing:
+
+```bash
+python examples/render_before_after.py
+```
+
+Orange points mark detected support boundaries in parameter space; the fitted
+surface view clips hole and exterior cells instead of rendering unsupported
+patch interiors. The rendered surface uses a higher-resolution patch grid than
+the fitted control mesh, so this improves presentation without changing the
+benchmark fit metrics.
+
+Use `--cloud ES` to render the end-systolic LA point cloud instead.
+
+## Quickstart
+
+```bash
+pip install -e .
+python -m unittest discover -s tests
+python examples/run_bifurcation_reference.py
+python benchmarks/benchmark_tspline.py --case bifurcation --grid 80 40
+python benchmarks/benchmark_fastfit.py --case tube --grid 64 48 --workers 1 2 4
+python benchmarks/benchmark_la_memory.py --thresholds 2 3 5 8 12 --workers 8
+```
+
+The CLI provides the same smoke workflows:
+
+```bash
+cardiac-kernels eval --case bifurcation --grid 160 96 --output outputs/bifurcation.csv
+cardiac-kernels bench --case tube --grid 80 40
+cardiac-kernels fastfit --case tube --input-grid 64 48 --workers 4
+```
+
+CUDA/Triton extension paths require a CUDA-enabled PyTorch install:
+
+```bash
+pip install -e .[torch,triton]
+python examples/fit_surface_to_point_cloud.py --case tube
+python benchmarks/benchmark_gpu_vast.py --case bifurcation --grid 400 200 --chamfer-points 8192 --repeats 20
+```
+
+## Why This Project
+
+The paper supplied with this task is FasTFit, a split-connect-fit algorithm for
+fixed 2D-parameterized point clouds. Instead of treating the existing local-knot
+evaluator as a fitting algorithm, this repo now has a parallel implementation of
+the paper's adaptive Bezier patch generation. By default, the accepted patch
+layout is globally refitted with hard C1 position and first-derivative
+constraints across shared patch boundaries, including T-junction overlap
+segments. Set `FastFitOptions(continuity="none")` to keep the earlier
+full-multiplicity baseline where each accepted Bezier patch remains independent.
+
+The lower-level evaluator remains useful for validating explicit local-knot
+T-splines and for CUDA/Triton surface-evaluation kernels. For a grid with `U`
+by `V` samples and `C` control points, the dense basis tensor has `U * V * C`
+entries. The CUDA/Triton path maps one output sample to one program/thread and
+accumulates the rational numerator and denominator directly.
+
+```text
+S(u, v) = sum_i B_i(u, v) * w_i * P_i / sum_i B_i(u, v) * w_i
+```
+
+The reference implementation remains the correctness oracle; the GPU kernels
+are compared against it by shape, finite outputs, and numerical error.
+
+## Repository Structure
+
+```text
+cardiac_geometry/
+  fastfit.py         Parallel FasTFit adaptive Bezier/T-spline fitting
+  reference/        NumPy basis and T-spline evaluators
+  io/               T-mesh sample-data loaders
+  geometry/         Surface and point-cloud helpers
+  torch_ops/        Optional PyTorch differentiable wrappers
+cuda/               CUDA extension sources
+triton_kernels/     Triton kernel prototypes
+benchmarks/         Runtime and accuracy benchmark scripts
+tests/              Unit tests for reference math and loaders
+examples/           Surface generation and fitting demos
+docs/               Design and portfolio writeups
+docs/assets/        README visualization assets
+data/sample/        Small tube and bifurcation cases
+data/la/            LA ED/ES point clouds used for memory benchmarks
+```
+
+## Current Validation
+
+The local Windows workspace validates the NumPy, PyTorch CPU, FasTFit C1
+continuity, optional PyTorch fitted-surface autograd, and reference-math paths.
+The GPU paths were benchmarked on a rented RTX 4090 instance with PyTorch
+2.11.0+cu128 and Triton 3.6.0.
+
+Headline RTX 4090 results:
+
+- T-spline eval, 400 x 200 grid: PyTorch CUDA 139.253 ms, Triton 0.117 ms,
+  about 1,190x faster with max absolute error 1.87e-6.
+- Chamfer distance, 8,192 x 8,192 points: `torch.cdist` 2.738 ms, Triton tiled
+  0.321 ms, about 8.5x faster with max absolute error 1.49e-8.
+- LA compact fitted models save 89.6% memory for ED and 87.6% for ES versus raw
+  float64 point arrays at threshold 12 after spherical parameterization and
+  occupancy-aware splitting.
+
+See `docs/performance_report.md` for the full tables. Downloaded GPU artifacts,
+including CSVs and Nsight Compute reports, are archived in `outputs/final_4090/`.

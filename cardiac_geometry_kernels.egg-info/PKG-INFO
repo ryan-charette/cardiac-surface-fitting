@@ -1,0 +1,109 @@
+Metadata-Version: 2.4
+Name: cardiac-geometry-kernels
+Version: 0.1.0
+Summary: Reference and GPU-ready kernels for cardiac T-spline surface evaluation.
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: numpy>=1.24
+Provides-Extra: dev
+Requires-Dist: pytest>=8; extra == "dev"
+Requires-Dist: matplotlib>=3.8; extra == "dev"
+Provides-Extra: torch
+Requires-Dist: torch>=2.4; extra == "torch"
+Provides-Extra: triton
+Requires-Dist: triton>=3.0; extra == "triton"
+
+# GPU-Accelerated Cardiac Geometry Kernels
+
+CUDA, Triton, and NumPy reference code for T-spline surface evaluation and
+FasTFit-style point-cloud fitting on cardiac geometry examples.
+
+## Highlights
+
+- Clean NumPy reference evaluator for local-knot-vector rational T-splines.
+- Parallel FasTFit implementation based on the split-connect-fit paper:
+  adaptive Bezier patch generation over fixed 2D-parameterized point clouds.
+- Correctness checks for repeated knots, endpoint sampling, zero denominators,
+  Bernstein bases, deterministic parallel fitting, vector-vs-mesh evaluation,
+  and fused-vs-vectorized evaluation.
+- Fused CUDA forward kernel that computes basis values and rational accumulation
+  in one pass without materializing a `U x V x C` basis tensor.
+- Triton degree-2 surface-evaluation prototype for AI-kernel workflow
+  comparison.
+- CUDA, Triton, PyTorch, and NumPy Chamfer-distance paths for point-cloud
+  fitting experiments.
+- Small bundled tube and bifurcation samples extracted from the original heart
+  modeling repository.
+
+## Quickstart
+
+```bash
+pip install -e .
+python -m unittest discover -s tests
+python examples/run_bifurcation_reference.py
+python benchmarks/benchmark_tspline.py --case bifurcation --grid 80 40
+python benchmarks/benchmark_fastfit.py --case tube --grid 64 48 --workers 1 2 4
+```
+
+The CLI provides the same smoke workflows:
+
+```bash
+cardiac-kernels eval --case bifurcation --grid 160 96 --output outputs/bifurcation.csv
+cardiac-kernels bench --case tube --grid 80 40
+cardiac-kernels fastfit --case tube --input-grid 64 48 --workers 4
+```
+
+CUDA/Triton extension paths require a CUDA-enabled PyTorch install:
+
+```bash
+pip install -e .[torch,triton]
+python examples/fit_surface_to_point_cloud.py --case tube
+```
+
+## Why This Project
+
+The paper supplied with this task is FasTFit, a split-connect-fit algorithm for
+fixed 2D-parameterized point clouds. Instead of treating the existing local-knot
+evaluator as a fitting algorithm, this repo now has a parallel implementation of
+the paper's adaptive Bezier patch generation. The returned patch network is the
+paper's full-multiplicity T-spline baseline: every patch boundary has
+multiplicity `degree + 1`, so each accepted Bezier patch is independently valid
+and can be fitted in parallel.
+
+The lower-level evaluator remains useful for validating explicit local-knot
+T-splines and for CUDA/Triton surface-evaluation kernels. For a grid with `U`
+by `V` samples and `C` control points, the dense basis tensor has `U * V * C`
+entries. The CUDA/Triton path maps one output sample to one program/thread and
+accumulates the rational numerator and denominator directly.
+
+```text
+S(u, v) = sum_i B_i(u, v) * w_i * P_i / sum_i B_i(u, v) * w_i
+```
+
+The reference implementation remains the correctness oracle; the GPU kernels
+are compared against it by shape, finite outputs, and numerical error.
+
+## Repository Structure
+
+```text
+cardiac_geometry/
+  fastfit.py         Parallel FasTFit adaptive Bezier/T-spline fitting
+  reference/        NumPy basis and T-spline evaluators
+  io/               T-mesh sample-data loaders
+  geometry/         Surface and point-cloud helpers
+  torch_ops/        Optional PyTorch differentiable wrappers
+cuda/               CUDA extension sources
+triton_kernels/     Triton kernel prototypes
+benchmarks/         Runtime and accuracy benchmark scripts
+tests/              Unit tests for reference math and loaders
+examples/           Surface generation and fitting demos
+docs/               Design and portfolio writeups
+data/sample/        Small tube and bifurcation cases
+```
+
+## Current Validation
+
+This workspace has NumPy and Matplotlib available, but not PyTorch, Triton, or a
+CUDA build toolchain. The CPU FasTFit and reference tests are therefore the
+validated paths in this environment. GPU files are included as implementation
+sources for a CUDA-enabled machine.
