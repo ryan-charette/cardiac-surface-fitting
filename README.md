@@ -1,4 +1,4 @@
-# GPU-Accelerated Cardiac Geometry Kernels
+# Diffeomorphic Modeling of Cardiac Structures
 
 CUDA, Triton, and NumPy reference code for T-spline surface evaluation and
 FasTFit-style point-cloud fitting on cardiac geometry examples.
