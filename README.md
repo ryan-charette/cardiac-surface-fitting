@@ -1,6 +1,7 @@
-# Diffeomorphic Modeling of Cardiac Structures
+# GPU-Accelerated Cardiac Geometry Kernels
 
-A GPU-accelerated toolkit for fitting T-spline surfaces to cardiac point-cloud data. The project includes NumPy reference evaluators, parallel FasTFit-style surface fitting, and Python demos for visualization and point-cloud fitting.
+CUDA, Triton, and NumPy reference code for T-spline surface evaluation and
+FasTFit-style point-cloud fitting on cardiac geometry examples.
 
 ## Highlights
 
@@ -28,21 +29,22 @@ A GPU-accelerated toolkit for fitting T-spline surfaces to cardiac point-cloud d
 
 ## Visualization
 
-![Before and after visualization of a cardiac point cloud fitted with the FasTFit surface model](docs/assets/before_after_fit.svg)
+![Aligned LA point cloud and C1 fitted FasTFit surface visualization](docs/assets/project_visualization.svg)
 
-The image is generated from the bundled LA ED point cloud using spherical
-parameterization, parameter-space occupancy masking around holes, and
-display-only mesh smoothing:
+The main visualization overlays the bundled LA ED point cloud and the fitted
+C1-constrained FasTFit surface in one aligned camera projection. Deep blue marks
+the input point cloud; soft red marks the fitted surface. The image is generated
+using spherical parameterization, parameter-space occupancy masking around
+holes, and display-only mesh smoothing:
 
 ```bash
-python examples/render_before_after.py
+python examples/render_project_visualization.py
 ```
 
-Orange points mark detected support boundaries in parameter space; the fitted
-surface view clips hole and exterior cells instead of rendering unsupported
-patch interiors. The rendered surface uses a higher-resolution patch grid than
-the fitted control mesh, so this improves presentation without changing the
-benchmark fit metrics.
+The fitted surface clips hole and exterior cells instead of rendering
+unsupported patch interiors. The rendered surface uses a higher-resolution patch
+grid than the fitted control mesh, so this improves presentation without
+changing the benchmark fit metrics.
 
 Use `--cloud ES` to render the end-systolic LA point cloud instead.
 
@@ -73,30 +75,6 @@ python examples/fit_surface_to_point_cloud.py --case tube
 python benchmarks/benchmark_gpu_vast.py --case bifurcation --grid 400 200 --chamfer-points 8192 --repeats 20
 ```
 
-## Why This Project
-
-The paper supplied with this task is FasTFit, a split-connect-fit algorithm for
-fixed 2D-parameterized point clouds. Instead of treating the existing local-knot
-evaluator as a fitting algorithm, this repo now has a parallel implementation of
-the paper's adaptive Bezier patch generation. By default, the accepted patch
-layout is globally refitted with hard C1 position and first-derivative
-constraints across shared patch boundaries, including T-junction overlap
-segments. Set `FastFitOptions(continuity="none")` to keep the earlier
-full-multiplicity baseline where each accepted Bezier patch remains independent.
-
-The lower-level evaluator remains useful for validating explicit local-knot
-T-splines and for CUDA/Triton surface-evaluation kernels. For a grid with `U`
-by `V` samples and `C` control points, the dense basis tensor has `U * V * C`
-entries. The CUDA/Triton path maps one output sample to one program/thread and
-accumulates the rational numerator and denominator directly.
-
-```text
-S(u, v) = sum_i B_i(u, v) * w_i * P_i / sum_i B_i(u, v) * w_i
-```
-
-The reference implementation remains the correctness oracle; the GPU kernels
-are compared against it by shape, finite outputs, and numerical error.
-
 ## Repository Structure
 
 ```text
@@ -121,7 +99,7 @@ data/la/            LA ED/ES point clouds used for memory benchmarks
 
 The local Windows workspace validates the NumPy, PyTorch CPU, FasTFit C1
 continuity, optional PyTorch fitted-surface autograd, and reference-math paths.
-The GPU paths were benchmarked on a rented RTX 4090 instance with PyTorch
+The GPU paths were benchmarked on an RTX 4090 instance with PyTorch
 2.11.0+cu128 and Triton 3.6.0.
 
 Headline RTX 4090 results:
