@@ -29,6 +29,7 @@ FasTFit-style point-cloud fitting on cardiac geometry examples.
 
 ## Visualization
 
+![Before and after visualization of a cardiac point cloud fitted with the FasTFit surface model](docs/assets/before_after_fit.svg)
 
 The image is generated from the bundled LA ED point cloud using spherical
 parameterization, parameter-space occupancy masking around holes, and
