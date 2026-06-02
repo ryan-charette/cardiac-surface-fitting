@@ -259,9 +259,9 @@ def render_project_visualization(
         '<text x="46" y="62" fill="#172033" font-size="30" font-weight="700">C1 Fitted Left-Atrium Surface</text>',
         '<text x="48" y="96" fill="#536070" font-size="17">Input point cloud and constrained FasTFit surface share one aligned camera projection.</text>',
         '<circle cx="55" cy="133" r="6" fill="#082f73" fill-opacity="0.86"/>',
-        '<text x="72" y="139" fill="#253247" font-size="15">deep blue: LA point cloud</text>',
+        '<text x="72" y="139" fill="#253247" font-size="15">blue: LA point cloud</text>',
         '<rect x="278" y="124" width="22" height="14" rx="2" fill="#eda1a0" stroke="#9d333b" stroke-opacity="0.35"/>',
-        '<text x="310" y="139" fill="#253247" font-size="15">soft red: C1 fitted surface</text>',
+        '<text x="310" y="139" fill="#253247" font-size="15">pink: C1 fitted surface</text>',
         (
             f'<text x="48" y="{height - 44}" fill="#7c2630" font-size="16">'
             f'LA {escape(cloud)} | {points.shape[0]:,} points | {len(model.patches)} patches | RMSE {rmse:.3f}'
