@@ -31,8 +31,8 @@ A GPU-accelerated toolkit for fitting T-spline surfaces to cardiac point-cloud d
 ![Aligned LA point cloud and C1 fitted FasTFit surface visualization](docs/assets/project_visualization.svg)
 
 The main visualization overlays the bundled LA ED point cloud and the fitted
-C1-constrained FasTFit surface in one aligned camera projection. Deep blue marks
-the input point cloud; soft red marks the fitted surface. The image is generated
+C1-constrained FasTFit surface in one aligned camera projection. Blue marks
+the input point cloud; pink marks the fitted surface. The image is generated
 using spherical parameterization, parameter-space occupancy masking around
 holes, and display-only mesh smoothing:
 
