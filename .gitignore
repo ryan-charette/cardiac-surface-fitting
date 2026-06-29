@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.tox/
+
+# Environments
+.venv/
+.env
+.python-version
+
+# Native build artifacts
+build/
+dist/
+*.pyd
+*.so
+*.dll
+*.dylib
+*.o
+*.obj
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
