@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,12 +8,14 @@ version = "0.1.0"
 description = "Reference and GPU-ready kernels for cardiac T-spline surface evaluation."
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
 dependencies = [
   "numpy>=1.24",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "matplotlib>=3.8"]
+test = ["pytest>=8"]
 torch = ["torch>=2.4"]
 triton = ["triton>=3.0"]
 
@@ -22,3 +24,36 @@ cardiac-kernels = "cardiac_geometry.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["cardiac_geometry*", "triton_kernels*"]
+
+[dependency-groups]
+dev = [
+  { include-group = "test" },
+  { include-group = "lint" },
+]
+test = [
+  "pytest>=8.0",
+]
+lint = [
+  "mypy>=1.10",
+  "pre-commit>=3.7",
+  "ruff>=0.6",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = ["-ra", "--strict-config", "--strict-markers"]
+xfail_strict = true
+log_level = "INFO"
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I", "UP"]
+
+[tool.mypy]
+strict = true
+warn_unreachable = true
+enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
